@@ -1,0 +1,17 @@
+{
+  "name": "@vehmloewff/server_method",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./index_bun.js",
+      "types": "./index_bun.ts",
+      "bun": "./index_bun.ts",
+      "browser": "./index_browser.ts"
+    }
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.17",
+    "typescript": "^5.8.3"
+  },
+  "private": true
+}

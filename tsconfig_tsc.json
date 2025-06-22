@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"lib": ["ESNext"],
+		"target": "ESNext",
+		"module": "Preserve",
+		"moduleDetection": "force",
+
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"outFile": "./dist/index.d.ts",
+
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true
+	}
+}
