@@ -1,35 +1,100 @@
-# @vehmloewff/server_method
+# @vehmloewff/server-method
 
 A utility for creating server methods.
 
-```ts
-// do_some_normal_stuff.ts
-import { serverMethod } from '@vehmloewff/server_method';
+- Uses a data cache for SSR.
+- Completly framework agnostic.
+- Server methods can be defined in the same file as browser code and fully tree-shaken out of browser bundles.
 
+### Requirements
+
+- A bundler that follows browser export conditions for building browser bundles.
+- A bundler or runtime that supports `node` or `bun` export conditions for bundling or running server code.
+- If you don't want server code in your browser bundles, you'll need to run the code through a bundler that does a good job treeshaking. In my experience this has only been rollup.
+
+## Usage
+
+Due to how this tool leverages export conditions and the mild complexity of a comprehensive integration, a working example has been written at [server-method-example](https://github.com/vehmloewff/server-method-example).
+
+Anywhere in your project you can define server methods.
+
+```ts
+// some_file.ts
 const sayHello = serverMethod('say_hello', {
-	schema: z.object({
-		name: z.string()
-	}),
+	match: { schema: { name: "string" } },
 	async fn(_, input) => {
-		return `Hello, ${input.name}!`;
+		return { greeting: `Hello, ${input.name}!` };
 	}
 });
+```
 
-export async function doSomeNormalStuff() {
-	console.log(await sayHello.run({ name: 'World' }))
+Of course, if your code is running on the server, you can call them directly.
+
+```ts
+console.log(await sayHello.call(new GenericContext(), { name: 'World' }));
+```
+
+Duh, not very impressive. But what is impresive is that you can call them from the browser.
+
+```ts
+// somewhere in your server route handlers...
+
+if (requestPath.startsWith('/methods/')) {
+	const res = await callServerMethod(new GenericContext(), requestPath.slice(9), await request.json());
+	return Response.json(res)
 }
 
-// server.ts
+// then, somewhere in your browser code that runs only once...
+setServerMethodBrowserHandler((_, id, input) => fetch(`/methods/${id}`, { method: 'POST', body: JSON.stringify(input) }).then(res => res.json()))
 
-import { callServerMethod } from '@vehmloewff/server_method';
-import { serve } from 'bun'
+// then, pretty much anywhere in your browser code, so long as you have called setServerMethodBrowserHandler already...
+console.log(await sayHello.call(new GenericContext(), { name: 'World' })) // Sends request to server, then prints `{ greeting: 'Hello, World!' }`
+```
 
-serve({
-	port: 5000,
-	async fetch(request) {
-		const methodName = new URL(request.url).pathname.slice(1);
-		await callServerMethod(methodName, request);
-		return new Response('Hello, World!');
-	}
-})
+> Tip: If you're passing the result of `JSON.parse` (or `res.json()`) directly into your methods, you'll be restricted to only using objects and arrays at the top level of your data because they are the only types that can be serialized to JSON. I like to wrap my request/response data in a `data` property. This ensures that the serialized json is always an object, even if my methods return or accept a single value.
+
+```js
+const response = await sayHello.call(new GenericContext(), { name: 'World' })
+console.log(response.data) // Prints `{ greeting: 'Hello, World!' }`
+```
+
+Note that when building a browser bundle, you'll need to be sure that you're using the `browser` export condition or else the browser bundle will behave like a server bundle, but this is the default behavior of most bundlers when targeting the browser.
+
+Also note that esbuild-based bundling systems don't treeshake very well, and the server code will remain in the bundle, but never be called. However, rollup-based bundling systems do treeshake well, and the server code will be removed from the bundle.
+
+> Tip: My favorite bundler is `bun build`, but it doesn't treeshake very well because it is port of esbuild. Therefore, after building with bun, I run `rollup build.js -o build.js` to shake out all the server code.
+
+#### Data Cache and SSR
+
+Often, in applications that perform SSR, it is important to run an (ideally fast) client-side hydration that should produce the same result as the server-side render. To that end, it is necessary that a) the called server methods do not make a series of HTTP requests back to the server, and b) the called server methods should return the exact same data that they did on the server.
+
+To accomplish these aims, a recording and replay functionality is provided around `GenericContext`. Here is how it is used:
+
+```ts
+// In the server handler, before any of the server methods are called for a given SSR request...
+const ctx = new GenericContext()
+startRecording(ctx)
+
+// We can then run our code that calls the server methods. Presumably, `ctx` is passed into each of the server methods'
+// `call` function.
+const html = await performSsrRender(ctx)
+
+// We can then stop the recording and dump the html cache. This htmlDataCache should be inserted directly into the
+// SSR-rendered HTML somewhere.
+const htmlDataCache = stopRecordingAndDumpHtml(ctx)
+
+// Ok, that's all of the server-side code. Now, we can run the client-side hydration code.
+// Before we hydrate, we want to create a context and enable replay. This function will look for the html generated by
+// `stopRecordingAndDumpHtml` anywhere in the dom.
+const ctx = new GenericContext()
+startBrowserReplay(ctx)
+
+// We can then run hydrate our client-side code. All calls to `serverMethod(...).call()` must happen in the exact same order as they
+// did during the SSR render.
+// Because we are currently replaying, these requests will not trigger calls to the function passed into `setServerMethodBrowserHandler`
+// but will instead immediately return the data that was returned during the SSR render.
+await performClientSideHydration(ctx)
+
+// Once we are done hydrating, we should stop the replay.
+stopBrowserReplay(ctx)
 ```
