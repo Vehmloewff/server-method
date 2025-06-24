@@ -89,10 +89,11 @@ const htmlDataCache = stopRecordingAndDumpHtml(ctx)
 const ctx = new GenericContext()
 startBrowserReplay(ctx)
 
-// We can then run hydrate our client-side code. All calls to `serverMethod(...).call()` must happen in the exact same order as they
+// We can then hydrate our html on the client-side. All calls to `serverMethod(...).call(...)` must happen in the exact same order as they
 // did during the SSR render.
 // Because we are currently replaying, these requests will not trigger calls to the function passed into `setServerMethodBrowserHandler`
 // but will instead immediately return the data that was returned during the SSR render.
+// It is assumed that the `serverMethod(...).call(...)` functions are passed the `ctx` that replay was enabled on.
 await performClientSideHydration(ctx)
 
 // Once we are done hydrating, we should stop the replay.
