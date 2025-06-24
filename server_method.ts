@@ -1,19 +1,19 @@
-import type { z } from 'zod'
 import { OnetimeCacheReader, OnetimeCacheWriter } from './onetime_cache'
 import type { GenericContext } from './generic_context'
+import type { MatchesSchema, Schema } from 'spartan-schema'
 
 const cacheReaderSymbol = Symbol('reader')
 const cacheWriterSymbol = Symbol('writer')
 
-export type ServerMethodParams<RequestData, ResponseData> = {
-	schema: z.Schema<RequestData>
-	fn(ctx: GenericContext, request: RequestData): Promise<ResponseData>
+export type ServerMethodParams<S extends Schema, ResponseData> = {
+	match: S
+	fn(ctx: GenericContext, request: MatchesSchema<S>): Promise<ResponseData>
 }
 
-export type ServerMethodFn = <RequestData, ResponseData>(
+export type ServerMethodFn = <S extends Schema, ResponseData>(
 	id: string,
-	params: ServerMethodParams<RequestData, ResponseData>
-) => ServerMethod<RequestData, ResponseData>
+	params: ServerMethodParams<S, ResponseData>
+) => ServerMethod<MatchesSchema<S>, ResponseData>
 
 export type GenericServerMethodFn = <RequestData, ResponseData>(
 	id: string,

@@ -1,6 +1,6 @@
 import type { GenericContext } from './generic_context'
 
-export type ServerMethodBrowserHandler = (ctx: GenericContext, input: unknown) => Promise<unknown>
+export type ServerMethodBrowserHandler = (ctx: GenericContext, methodId: string, input: unknown) => Promise<unknown>
 
 let stashedHandler: ServerMethodBrowserHandler | null = null
 
@@ -8,8 +8,8 @@ export function setServerMethodBrowserHandler(handler: ServerMethodBrowserHandle
 	stashedHandler = handler
 }
 
-export async function callServerMethodBrowserHandler(ctx: GenericContext, input: unknown): Promise<unknown> {
+export async function callServerMethodBrowserHandler(ctx: GenericContext, methodId: string, input: unknown): Promise<unknown> {
 	if (!stashedHandler) throw new Error('No server method browser handler set')
 
-	return await stashedHandler(ctx, input)
+	return await stashedHandler(ctx, methodId, input)
 }

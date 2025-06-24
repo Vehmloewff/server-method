@@ -1,15 +1,35 @@
 # @vehmloewff/server_method
 
-To install dependencies:
+A utility for creating server methods.
 
-```bash
-bun install
+```ts
+// do_some_normal_stuff.ts
+import { serverMethod } from '@vehmloewff/server_method';
+
+const sayHello = serverMethod('say_hello', {
+	schema: z.object({
+		name: z.string()
+	}),
+	async fn(_, input) => {
+		return `Hello, ${input.name}!`;
+	}
+});
+
+export async function doSomeNormalStuff() {
+	console.log(await sayHello.run({ name: 'World' }))
+}
+
+// server.ts
+
+import { callServerMethod } from '@vehmloewff/server_method';
+import { serve } from 'bun'
+
+serve({
+	port: 5000,
+	async fetch(request) {
+		const methodName = new URL(request.url).pathname.slice(1);
+		await callServerMethod(methodName, request);
+		return new Response('Hello, World!');
+	}
+})
 ```
-
-To run:
-
-```bash
-bun run 
-```
-
-This project was created using `bun init` in bun v1.2.15. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.

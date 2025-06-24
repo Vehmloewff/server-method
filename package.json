@@ -11,14 +11,14 @@
 	},
 	"exports": {
 		".": {
-			"import": "./dist/index_bun.js",
 			"types": "./dist/index.d.ts",
+			"node": "./dist/index_bun.js",
 			"bun": "./dist/index_bun.ts",
 			"browser": "./dist/index_browser.js"
 		}
 	},
 	"peerDependencies": {
-		"zod": "^3.0.0"
+		"spartan-schema": "^1.1.1"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.2.17",
