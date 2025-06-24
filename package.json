@@ -1,17 +1,28 @@
 {
-  "name": "@vehmloewff/server_method",
-  "type": "module",
-  "exports": {
-    ".": {
-      "import": "./index_bun.js",
-      "types": "./index_bun.ts",
-      "bun": "./index_bun.ts",
-      "browser": "./index_browser.ts"
-    }
-  },
-  "devDependencies": {
-    "@types/bun": "^1.2.17",
-    "typescript": "^5.8.3"
-  },
-  "private": true
+	"name": "@vehmloewff/server_method",
+	"version": "1.0.0",
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "bun run build.ts",
+		"prepublishOnly": "bun run build"
+	},
+	"exports": {
+		".": {
+			"import": "./dist/index_bun.js",
+			"types": "./dist/index.d.ts",
+			"bun": "./dist/index_bun.ts",
+			"browser": "./dist/index_browser.js"
+		}
+	},
+	"peerDependencies": {
+		"zod": "^3.0.0"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.2.17",
+		"bun-plugin-dts": "^0.3.0",
+		"typescript": "^5.8.3"
+	}
 }

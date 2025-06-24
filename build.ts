@@ -1,8 +1,11 @@
-import { build, $ } from "bun";
+import { build } from "bun";
+import { rename } from "node:fs/promises";
+import dts from "bun-plugin-dts";
 
 await build({
 	entrypoints: ["./index_bun.ts"],
 	outdir: "./dist",
+	plugins: [dts()],
 	format: "esm",
 });
 
@@ -12,4 +15,4 @@ await build({
 	format: "esm",
 });
 
-await $`bunx tsc -p tsconfig_tsc.json`;
+await rename("./dist/index_bun.d.ts", "./dist/index.d.ts");
