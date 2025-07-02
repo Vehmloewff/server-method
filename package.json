@@ -6,8 +6,7 @@
 		"dist"
 	],
 	"scripts": {
-		"build": "bun run build.ts",
-		"prepublishOnly": "bun run build"
+		"prepack": "bun run build.ts"
 	},
 	"exports": {
 		".": {

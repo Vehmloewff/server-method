@@ -46,18 +46,18 @@ export function startRecording(ctx: GenericContext) {
 	ctx.set(cacheWriterSymbol, new OnetimeCacheWriter())
 }
 
-export function stopRecordingAndDumpHtml(ctx: GenericContext) {
+export function stopRecordingGetCacheData(ctx: GenericContext) {
 	const writer = ctx.get<OnetimeCacheWriter>(cacheWriterSymbol)
 	if (!writer) throw new Error('Recording was never started on the server method context')
 
-	const html = writer.getScriptTag()
+	const html = writer.getCacheData()
 	ctx.set(cacheWriterSymbol, null)
 
 	return html
 }
 
-export function startBrowserReplay(ctx: GenericContext) {
-	ctx.set(cacheReaderSymbol, new OnetimeCacheReader())
+export function startBrowserReplay(ctx: GenericContext, cacheData: string) {
+	ctx.set(cacheReaderSymbol, new OnetimeCacheReader(cacheData))
 }
 
 export function stopBrowserReplay(ctx: GenericContext) {

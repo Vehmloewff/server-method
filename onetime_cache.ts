@@ -12,20 +12,17 @@ export class OnetimeCacheWriter {
 		this.#items.push({ methodId, data })
 	}
 
-	getScriptTag() {
-		return `<script id="${ONETIME_CACHE_SCRIPT_ID}" type="application/json">${JSON.stringify(this.#items.reverse())}</script>`
+	getCacheData() {
+		return JSON.stringify(this.#items.reverse())
 	}
 }
 
 export class OnetimeCacheReader {
 	#items: OneTimeCacheEntry[]
 
-	constructor() {
-		const script = document.getElementById(ONETIME_CACHE_SCRIPT_ID)
-		if (!script) throw new Error('Onetime cache script not found')
-
+	constructor(cacheData: string) {
 		try {
-			this.#items = JSON.parse(script.textContent || '') as OneTimeCacheEntry[]
+			this.#items = JSON.parse(cacheData) as OneTimeCacheEntry[]
 		} catch (error) {
 			throw new Error('Failed to parse onetime cache data')
 		}
