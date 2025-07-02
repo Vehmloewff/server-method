@@ -2,7 +2,7 @@ export {
 	startBrowserReplay,
 	startRecording,
 	stopBrowserReplay,
-	stopRecordingAndDumpHtml,
+	stopRecordingGetCacheData,
 	type ServerMethodParams,
 	type ServerMethod,
 } from './server_method'
