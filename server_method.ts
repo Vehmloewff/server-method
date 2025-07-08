@@ -46,7 +46,7 @@ export function startRecording(ctx: GenericContext) {
 	ctx.set(cacheWriterSymbol, new OnetimeCacheWriter())
 }
 
-export function stopRecordingGetCacheData(ctx: GenericContext) {
+export function stopRecordingAndGetCacheData(ctx: GenericContext) {
 	const writer = ctx.get<OnetimeCacheWriter>(cacheWriterSymbol)
 	if (!writer) throw new Error('Recording was never started on the server method context')
 
