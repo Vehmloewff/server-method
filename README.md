@@ -1,4 +1,4 @@
-# @emooring/server-method
+# @emooring/server_method
 
 A utility for creating server methods.
 
