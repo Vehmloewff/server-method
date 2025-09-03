@@ -1,4 +1,4 @@
-# @vehmloewff/server-method
+# @emooring/server-method
 
 A utility for creating server methods.
 
